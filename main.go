@@ -38,6 +38,7 @@ func main() {
 	e.POST("/user/logout", userLogout)
 
 	// Start the Echo server
+	fmt.Printf("Server is listening on port %s...\n", ":8000")
 	e.Logger.Fatal(e.Start(":8000"))
 
 }
