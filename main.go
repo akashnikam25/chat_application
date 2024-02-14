@@ -37,4 +37,7 @@ func main() {
 	e.POST("/user/login", userLogin)
 	e.POST("/user/logout", userLogout)
 
+	// Start the Echo server
+	e.Logger.Fatal(e.Start(":8000"))
+
 }

@@ -7,7 +7,7 @@ import (
 const (
 	//dbqueries 
 	insertUser = "INSERT INTO users (Username, Password, Email) VALUES (?, ?, ?)"
-	getUserId  = "Selet * from user"
+	getUserId  = "Select * from user"
 )
 type User struct {
 	UserId   int    `json:"UserId"`
