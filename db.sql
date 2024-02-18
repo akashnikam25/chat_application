@@ -1,31 +1,31 @@
 -- Create Users Table
-CREATE TABLE Users (
-    UserID INT PRIMARY KEY AUTO_INCREMENT,
-    Username VARCHAR(255) NOT NULL,
-    Password VARCHAR(255) NOT NULL,
-    Email VARCHAR(255) NOT NULL
+CREATE TABLE users (
+    userid SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL
 );
 
 -- Create Conversations Table
-CREATE TABLE Conversations (
-    ConversationID INT PRIMARY KEY AUTO_INCREMENT,
-    User1ID INT NOT NULL,
-    User2ID INT NOT NULL,
-    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (User1ID) REFERENCES Users(UserID),
-    FOREIGN KEY (User2ID) REFERENCES Users(UserID)
+CREATE TABLE conversations (
+    conversationid SERIAL PRIMARY KEY,
+    user1id INT NOT NULL,
+    user2id INT NOT NULL,
+    createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user1id) REFERENCES users(userid),
+    FOREIGN KEY (user2id) REFERENCES users(userid)
 );
 
 -- Create Messages Table
-CREATE TABLE Messages (
-    MessageID INT PRIMARY KEY AUTO_INCREMENT,
-    ConversationID INT NOT NULL,
-    SenderUserID INT NOT NULL,
-    ReceiverUserID INT NOT NULL,
-    Content TEXT,
-    SentAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ConversationID) REFERENCES Conversations(ConversationID),
-    FOREIGN KEY (SenderUserID) REFERENCES Users(UserID),
-    FOREIGN KEY (ReceiverUserID) REFERENCES Users(UserID)
+CREATE TABLE messages (
+    messageid SERIAL PRIMARY KEY,
+    conversationid INT NOT NULL,
+    senderuserid INT NOT NULL,
+    receiveruserid INT NOT NULL,
+    content TEXT,
+    sentat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversationid) REFERENCES conversations(conversationid),
+    FOREIGN KEY (senderuserid) REFERENCES users(userid),
+    FOREIGN KEY (receiveruserid) REFERENCES users(userid)
 );

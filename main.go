@@ -1,35 +1,35 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	_ "github.com/lib/pq"
 )
 
 var (
-	db  *sql.DB
+	db  *sqlx.DB
 	err error
 )
 
 func initDb() {
-	conStr := "root:akash@tcp(127.0.0.1:3306)/chatapp1"
-	db, err = sql.Open("mysql", conStr)
+	db, err = sqlx.Connect("postgres", "host=localhost port=5432 user=postgres password=akash dbname=chatapp sslmode=disable")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error connecting to the database:", err)
 	}
-	err = db.Ping()
+	err = db.DB.Ping()
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Connected to MySQL database!")
 }
 func main() {
-	defer db.Close()
 	initDb()
+	defer db.DB.Close()
+
 	e := echo.New()
 	// Use the CORS middleware to enable Cross-Origin Resource Sharing
 	e.Use(middleware.CORS())
