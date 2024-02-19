@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +13,7 @@ const (
 	//dbqueries
 	insertUser  = `INSERT INTO users (username,password,email) VALUES (:UserName,:Password,:Email)`
 	getUserId   = "Select userid from users where email = $1"
-	getuserPass = "Select password from users where UserId = $1"
+	getuserPass = "Select password from users where userid = $1"
 )
 
 type User struct {
@@ -25,30 +24,27 @@ type User struct {
 }
 type Response struct {
 	Msg    string `json:"message"`
-	UserId int    `json:"userid"`
+	UserId int    `json:"userid,omitempty"`
 }
 
 func userLogin(c echo.Context) error {
 	u := User{}
-	var (
-		hashPass string
-		password string
-	)
-
+	var hashPass string
 	c.Bind(&u)
-
-	db.Get(&password, getuserPass, u.UserId)
+	rsp := Response{}
+	err = db.Get(&hashPass, getuserPass, u.UserId)
 	if err != nil {
-		fmt.Println("user password err", err)
-		return err
+		rsp.Msg = err.Error()
+		return c.JSON(http.StatusInternalServerError, rsp)
 	}
 
-	if ok := comparePasswords(hashPass, []byte(hashPass)); !ok {
-		fmt.Println("password is incorrect")
-		return errors.New("password is incorrect")
+	if ok := comparePasswords(hashPass, []byte(u.Password)); !ok {
+		rsp.Msg = "Password is incorrect"
+		return c.JSON(http.StatusForbidden, rsp)
 	}
-	rsp := Response{
-		Msg: " User Logged in",
+	rsp = Response{
+		Msg:    " User Logged in",
+		UserId: u.UserId,
 	}
 	return c.JSON(http.StatusOK, rsp)
 }
@@ -80,7 +76,7 @@ func userSignUp(c echo.Context) error {
 		UserId: user.UserId,
 	}
 
-	return c.JSON(http.StatusOK, rsp)
+	return c.JSON(http.StatusCreated, rsp)
 }
 
 func userLogout(c echo.Context) error {
