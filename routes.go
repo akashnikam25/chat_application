@@ -11,9 +11,10 @@ import (
 
 const (
 	//dbqueries
-	insertUser  = `INSERT INTO users (username,password,email) VALUES (:UserName,:Password,:Email)`
-	getUserId   = "Select userid from users where email = $1"
-	getuserPass = "Select password from users where userid = $1"
+	insertUser    = `INSERT INTO users (username,password,email) VALUES (:UserName,:Password,:Email)`
+	getUserId     = `Select userid from users where email = $1`
+	getuserPass   = `Select password from users where userid = $1`
+	getAllUserIds = `Select * from users`
 )
 
 type User struct {
@@ -25,9 +26,11 @@ type User struct {
 type Response struct {
 	Msg    string `json:"message"`
 	UserId int    `json:"userid,omitempty"`
+	Users  []User `json:"getAllUsers,omitempty"`
 }
 
 func userLogin(c echo.Context) error {
+
 	u := User{}
 	var hashPass string
 	c.Bind(&u)
@@ -42,9 +45,25 @@ func userLogin(c echo.Context) error {
 		rsp.Msg = "Password is incorrect"
 		return c.JSON(http.StatusForbidden, rsp)
 	}
+
+	users := []User{}
+	err = db.Select(&users, getAllUserIds)
+	if err != nil {
+		fmt.Println("getAllUsers err", err)
+		rsp.Msg = err.Error()
+		return c.JSON(http.StatusInternalServerError, rsp)
+	}
+	uids := []User{}
+	for _, user := range users {
+		if user.UserId != u.UserId {
+			uids = append(uids, user)
+		}
+	}
+
 	rsp = Response{
 		Msg:    " User Logged in",
 		UserId: u.UserId,
+		Users:  uids,
 	}
 	return c.JSON(http.StatusOK, rsp)
 }
@@ -52,9 +71,17 @@ func userLogin(c echo.Context) error {
 func userSignUp(c echo.Context) error {
 	u := User{}
 	c.Bind(&u)
+
+	rsp := Response{}
 	p := hashAndSalt([]byte(u.Password))
-	fmt.Println("Password	:	", p)
-	fmt.Println("u.Username", u.UserName, u.Email)
+
+	uid := 0
+	err := db.Get(&uid, getUserId, u.Email)
+	if err == nil && uid != 0 {
+		rsp.Msg = "User Already exist, Please login again"
+		return c.JSON(http.StatusForbidden, rsp)
+	}
+
 	_, err = db.NamedExec(insertUser,
 		map[string]interface{}{
 			"UserName": u.UserName,
@@ -71,11 +98,8 @@ func userSignUp(c echo.Context) error {
 		return err
 	}
 
-	rsp := Response{
-		Msg:    " User got created",
-		UserId: user.UserId,
-	}
-
+	rsp.Msg = "User got created"
+	rsp.UserId = user.UserId
 	return c.JSON(http.StatusCreated, rsp)
 }
 
@@ -111,4 +135,31 @@ func comparePasswords(hashedPwd string, plainPwd []byte) bool {
 	}
 
 	return true
+}
+
+func sendMsg(c echo.Context) error {
+
+	return nil
+}
+
+func getConversation(c echo.Context) error {
+	// Fetch conversation from the database and return
+	return nil
+}
+
+func createConversation(c echo.Context) error {
+	// Parse request body to create a new conversation
+	// Insert conversation into the database
+	return nil
+}
+
+func getMessage(c echo.Context) error {
+	// Fetch message from the database and return
+	return nil
+}
+
+func sendMessage(c echo.Context) error {
+	// Parse request body to send a new message
+	// Insert message into the database
+	return nil
 }

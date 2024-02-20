@@ -36,6 +36,7 @@ func main() {
 	e.POST("/user/signup", userSignUp)
 	e.POST("/user/login", userLogin)
 	e.POST("/user/logout", userLogout)
+	e.POST("/user/coversation/", createConversation)
 
 	// Start the Echo server
 	fmt.Printf("Server is listening on port %s...\n", ":8000")
